@@ -1,0 +1,16 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Proxy server for Kontent.ai link-checking tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Champ-Dog Code",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.3.4",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}
