@@ -59,8 +59,8 @@ async function processUserInputs() {
       : "00000000-0000-0000-0000-000000000000";
     linkToContentItem = `https://app.kontent.ai/${project}/content-inventory/${languageID}/content/`;
     return { language };
-  } catch {
-    displayNotification(error.message, "is-danger");
+  } catch (error) {
+    throw new Error(error.message);
   }
 }
 
@@ -93,25 +93,34 @@ async function getLanguageID(languageCodename) {
 // attempts to handle failed states (no content types containing rich text
 // elements/no external URLs found in project) gracefully
 async function controlScript() {
-  // check for supplied language codename - needed for "retrieve items" call
-  const { language } = await processUserInputs();
-  // checks for rich text elements in content types of the project
-  const anyRichTextTypes = await checkTypes();
-  // if none are found, alerts user; otherwise begins checking for external URLs
-  const anyURLs =
-    anyRichTextTypes == ""
-      ? displayNotification(
-          "No Content Types with Rich Text Elements found.",
-          "is-warning"
-        )
-      : await findExternalLinks(anyRichTextTypes, language);
-  // if no external URLs found, alerts user; otherwise sends URLs to server
-  // for testing
-  if (anyURLs[0].length == 0) {
-    displayNotification("No external URLs found", "is-warning");
-  } else {
-    displayNotification(`${anyURLs[1]} URLs found for testing`, "is-success");
-    await testLinks(anyURLs[0]);
+  try {
+    // check for supplied language codename - needed for "retrieve items" call
+    const { language } = await processUserInputs();
+    // checks for rich text elements in content types of the project
+    const anyRichTextTypes = await checkTypes();
+    // if none are found, alerts user; otherwise begins checking for external URLs
+    if (anyRichTextTypes == "") {
+      displayNotification(
+        "No Content Types with Rich Text Elements found.",
+        "is-warning"
+      );
+      throw new Error("Process Aborted");
+    }
+    const anyURLs = await findExternalLinks(anyRichTextTypes, language);
+    // if no external URLs found, alerts user; otherwise sends URLs to server
+    // for testing
+    if (anyURLs[0].length == 0) {
+      displayNotification("No external URLs found", "is-warning");
+      throw new Error("Process Aborted")
+    } else {
+      displayNotification(`${anyURLs[1]} URLs found for testing`, "is-success");
+      await testLinks(anyURLs[0]);
+    }
+  } catch (error) {
+    // log error to console for debugging purposes
+    console.error(error);
+    // throw error to be handled by initiating function
+    displayNotification(`${error.message}`, "is-danger");
   }
 }
 
@@ -121,9 +130,16 @@ async function controlScript() {
 // identical - there are no rich text elements found that could have external
 // URLs to check for, so there is no point attempting to retrieve content items.
 async function checkTypes() {
-  const typesInProject = await getTypes();
-  const contentTypesWithRichText = await findRichTextTypes(typesInProject);
-  return contentTypesWithRichText;
+  try {
+    const typesInProject = await getTypes();
+    const contentTypesWithRichText = await findRichTextTypes(typesInProject);
+    return contentTypesWithRichText;
+  } catch (error) {
+    // log error to console for debugging purposes
+    console.error(error);
+    // throw error to be handled by initiating function
+    throw new Error(error.message);
+  }
 }
 
 // Retrieves content items of the types identified previously as containing
@@ -132,9 +148,16 @@ async function checkTypes() {
 // "fail states" are the same: whether no items are returned, or no external
 // URLs are found, there are no URLs to send to the server for testing.
 async function findExternalLinks(types, language) {
+  try {
   const richTextItems = await getItems(types, language);
   const foundURLs = await findURLsInRichText(richTextItems);
   return foundURLs;
+  } catch (error) {
+    // log error to console for debugging purposes
+    console.error(error);
+    // throw error to be handled by initiating function
+    throw new Error(error.message);
+  }
 }
 
 // SECTION: Operations
@@ -159,17 +182,16 @@ async function getTypes() {
       if (response.pagination.next_page == "") {
         isNextPage = false;
       } else {
-        typesEndpoint = response.pagination.next_page;
+        endpoint = response.pagination.next_page;
       }
     }
     return retrievedTypes.flat();
   } catch (error) {
     // log error to console for debugging purposes
     console.error(error);
-    // inform the user of the error
-    displayNotification(
-      `Error occured retrieving your content types: "${error.message}"`,
-      "is-danger"
+    // throw error to be handled by initiating function
+    throw new Error(
+      `Error occured retrieving your content types: "${error.message}"`
     );
   }
 }
@@ -199,10 +221,9 @@ async function findRichTextTypes(types) {
   } catch (error) {
     // log error to console for debugging purposes
     console.error(error);
-    // inform the user of the error
-    displayNotification(
-      `Error occurred searching your content types: ${error.message}`,
-      "is-danger"
+    // throw error to be handled by initiating function
+    throw new Error(
+      `Error occurred searching your content types: ${error.message}`
     );
   }
 }
@@ -214,7 +235,7 @@ async function getItems(types, language) {
   const retrievedItems = [];
   let isNextPage = true;
   // Configure API call parameters + filters
-  const endpoint = setCallParameters(types, language);
+  let endpoint = setCallParameters(types, language);
 
   try {
     while (isNextPage) {
@@ -223,7 +244,7 @@ async function getItems(types, language) {
       if (response.pagination.next_page == "") {
         isNextPage = false;
       } else {
-        itemEndpoint = response.pagination.next_page;
+        endpoint = response.pagination.next_page;
       }
     }
     return retrievedItems.flat();
@@ -231,9 +252,8 @@ async function getItems(types, language) {
     // log error to console for debugging purposes
     console.error(error);
     // throw error to be handled by initiating function
-    displayNotification(
-      `Error occured retrieving your content items: ${error.message}`,
-      "is-danger"
+    throw new Error(
+      `Error occured retrieving your content items: ${error.message}`
     );
   }
 }
@@ -414,7 +434,12 @@ function displayNotification(message, notificationType) {
   const notificationArea = document.getElementById("message");
   const notification = document.createElement("p");
   notification.textContent = message;
-  notification.classList.add("notification", `${notificationType}`, "mx-5");
+  notification.classList.add(
+    "notification",
+    `${notificationType}`,
+    "is-light",
+    "mx-5"
+  );
   notificationArea.appendChild(notification);
 }
 
@@ -428,12 +453,11 @@ async function callAPI(endpoint, requestMethod) {
       method: `${requestMethod}`,
       headers: headers,
     });
+    // Since many errors will still count as a "success" for fetch(), they must be
+    // handled here - they won't trigger the catch() block
     if (!res.ok) {
-      displayNotification(
-        `Failed to retrieve items, status: ${res.status}`,
-        "is-danger"
-      );
-      return;
+      // throw error to be handled by initiating function
+      throw new Error(`API request failed: ${res.status}`);
     }
     return res.json();
   } catch (error) {

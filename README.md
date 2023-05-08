@@ -24,6 +24,14 @@ Supply an Environment ID (required), Preview API Key (optional), and Language Co
 
 The tool will scan for URLs, and send them to a server to be tested, and display the responses on-screen in table form. Note that the server will 'stream' responses as each URL is checked, and these are rendered as they come. This avoids lengthy delays when there are many URLs to check, or when URLs respond slowly.
 
+### Errors
+
+*API Request Failed: 401*
+This indicates an authentication request, please check the supplied API Key (and remember: this only works with Preview API Key)
+
+*API Request Failed: 404*
+This indicates a bad request to the API. Please check the parameters you provided, particularly the Project ID.
+
 ## Tech Stack
 
 - This tool was built primarily with HTML and vanilla JavaScript.
