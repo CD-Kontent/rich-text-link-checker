@@ -26,9 +26,9 @@ The tool will scan for URLs, and send them to a server to be tested, and display
 
 ## Tech Stack
 
-This tool was built primarily with HTML and vanilla JavaScript.
-Bulma was used for styling.
-The tool uses the Kontent.ai Delivery REST API.
+- This tool was built primarily with HTML and vanilla JavaScript.
+- Bulma was used for styling.
+- The works on the Kontent.ai Delivery REST API.
 
 ## Planned Features
 
