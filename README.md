@@ -1,4 +1,5 @@
 # Link Checker for Rich Text
+v1.0
 
 ## Description
 
