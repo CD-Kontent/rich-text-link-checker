@@ -19,8 +19,8 @@ Note that the tool will make several API calls in this process, which will count
 - If no language codename is provided, will scan default language only.
 - Works with Delivery REST API (and Preview) only.
 - Does not work with Secure Access for Delivery API. If Secure Access is enabled, use a Preview API Key.
-- Invalid inputs in any of the input fields will result in failure (e.g., there is no resiliency feature to default to normal Delivery API if Preview API Key is invalid - the Preview API will be called and the request will fail).
-- There is no validation on the input fields. Environment IDs and API Keys are complex strings and I don't have access to the algorithms governing them; and language codenames can be configured by users, making them unpredictable.
+- Invalid inputs in any of the input fields will result in failure (e.g., there is no resiliency feature to default to normal Delivery API if Preview API Key is invalid - the Preview API will be called, and the request will fail).
+- There is no validation on the input fields. Environment IDs and API Keys are complex strings, and I don't have access to the algorithms governing them; and language codenames can be configured by users, making them unpredictable.
 - Results do not persist between operations - beginning a new scan will remove the results of any previous scans.
 
 ### Features
@@ -29,17 +29,17 @@ Note that the tool will make several API calls in this process, which will count
 The "Content Item Name" field in the results table is also a link, configured to open the Kontent.ai app to the specific Content Item in which the link was found. This makes it easier to correct or remove "broken" links!
 
 #### Incremental Table Pagination
-The prototype of this tool presented results to the user in a table that was rendered incrementally, as results are returned from the server. This was to reduce the wait time for initial results caused by longer response times, timeouts, or retries for certain URLs. Waiting for every URL to tested, and the responses returned, would quickly lead to a lengthy wait for the user to see any results from their scan.
+The prototype of this tool presented results to the user in a table that rendered incrementally, as results were returned from the server. This was to reduce the wait time for initial results caused by longer response times, timeouts, or retries for certain URLs. Waiting for every URL to tested, and the responses returned, would quickly lead to a lengthy wait for the user to see any results from their scan.
 
 Rendering results one-at-a-time was an adequate solution throughout most of development, working with small test projects. However, when testing on larger projects, this quickly become unmanageable, as the table could contain hundreds, or thousands, of rows added. While paginating large sets like this would typically be handled server-side, by returning subsets of data representing a table "page", this would reintroduce the possibility of increased wait times (and wouldn't provide the opportunity to learn something new while developing the tool).
 
 The obvious approach to client-side pagination would be to wait for the entire data set before dividing it into pages, however this had already been deemed unsuitable - waiting for everything to be tested was the original problem being addressed!
 
-The current behaviour is a mix of both incremental rendering and pagination. Results are rendered one-at-a-time as they are returned by the server, up to a certain threshold. As enough results are returned to render a "full" page (determing by an "items per page" value), a page number is added to the screen for the user to navigate. This is effectiely an incremental approach to pagination; from the user perspective pages are added one-at-a-time as the results are returned.
+The current behaviour is a mix of both incremental rendering and pagination. Results are rendered one-at-a-time as the server returns them, up to a certain threshold. When enough results are returned to render a "full" page (determined by an "items per page" value), a page number is added to the screen for the user to navigate. This is effectively an incremental approach to pagination; from the user perspective pages are added one-at-a-time as the results are returned.
 
-This may not necessarily be the most "performant" approach, particularly on client devices with limited resources. Smilarly, the "functional" metric of how long a user waits could easily be impacted by the added wait times from more network requests introduced by server-side pagination, particularly for users with poor network speeds. 
+This may not necessarily be the most "performant" approach, particularly on client devices with limited resources. Similarly, the "functional" metric of how long a user waits could easily be impacted by the added wait times from more network requests introduced by server-side pagination, particularly for users with poor network speeds. 
 
-This may warrant further investigation in the future, but for the very limited scope of this project, the current approach currently seems sufficient.
+This may warrant further investigation in the future, but for the limited scope of this project, the current approach currently seems sufficient.
 
 ### Issues
 
@@ -96,10 +96,11 @@ This is something of a "worst of both worlds" situation, as there is no way for 
 
 Current pagination behaviour produces a navigation icon per page. This works admirably for moderate datasets, but is unmanageable for larger sets, as the number of icons grows to the dozens, or hundreds. A commonly used approach is to include ellipses to indicate a range of hidden page numbers, which should work suitably for this project.
 
-As an amusing side-note, one project set up to test the tool with a large number of external URLs (currently over 3000) will result in the page navigation taking up more display area than the results table!
+As an amusing sidenote, one project set up to test the tool with a large number of external URLs (currently over 3000) will result in the page navigation taking up more display area than the results table!
 
 ## Notes
 
 ### Environment vs Project
-During the development of this project, Kontent.ai moved towards greater distiction between Projects and Environments, and what was once called a Project ID was changed to (the more accurate) Environment ID.
-I've changed the user-facing references to Environment ID, but there are still references to "project" in the code that should be understood as "environment."
+During the development of this project, Kontent.ai moved towards greater distinction between Projects and Environments, and what was once called a Project ID was changed to (the more accurate) Environment ID.
+I have changed the user-facing references to Environment ID, but there are still references to "project" in the code that should be understood as "environment."
+
