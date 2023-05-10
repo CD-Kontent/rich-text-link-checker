@@ -48,7 +48,13 @@ The plan is to improve this over time, but no promises are being offered.
 
 Supply an Environment ID (required), Preview API Key (optional), and Language Codename (optional), in the provided form.
 
-The tool will scan for URLs, and send them to a server to be tested, and display the responses on-screen in table form.
+The tool will scan for URLs, and send them to a server to be tested, and display the responses on-screen in table form. 
+
+### Colour Codes
+
+- A *green* row indicates that the URL behaved as expected: the request was successful, with no redirects.
+- A *yellow* row indicates that the request to this URL was redirected.
+- A *red* row indicates the request to this URL returned an error (potential indication for a 'dead link').
 
 ### API Errors
 
