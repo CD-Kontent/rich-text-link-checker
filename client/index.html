@@ -20,7 +20,7 @@
             class="input"
             required
             name="project-id"
-            placeholder="Project ID"
+            placeholder="Environment ID"
           />
         </div>
         <div class="field">
@@ -43,7 +43,7 @@
           type="submit"
           id="submit"
           class="button is-primary"
-          value="Submit"
+          value="Scan my Environment!"
           onClick="controlScript()"
         />
       </form>
@@ -59,10 +59,17 @@
       </div>
     </section>
 
-    <div class="table-container is-fluid" style="padding: 5vh">
-      <table id="results" class="table is-striped" data-pagecount="50"></table>
+    <div class="table-container" style="padding: 5vh">
+      <table class="table is-striped is-fullwidth">
+        <thead id="header"></thead>
+        <tbody id="results"></tbody>
+      </table>
     </div>
+    <div class="container is-fluid"><nav class="pagination is-fluid">
+      <ul id="pageList" class="pagination-list"></ul>
+    </nav></div>
+    
+
     <script src="core.js"></script>
-    <!-- <script src="https://unpkg.com/fetch-jsonp"></script> -->
   </body>
 </html>

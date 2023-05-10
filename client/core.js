@@ -1,6 +1,6 @@
-// SECTION: Parameters
-// This section contains functions and global variables that govern the parameters of the
-// tool.
+// SECTION: Configuration
+// This section contains functions and global variables to set the parameters for the
+// tool
 
 // Prevent screen refresh to display results without redirecting to new page. Clears page
 // of results of previous operations.
@@ -12,6 +12,10 @@ submit.addEventListener("click", (event) => {
   const table = document.getElementById("results");
   table.innerHTML = "";
 });
+
+// I dislike using a global variable to store the response data, but them's the breaks.
+// This is necessary to implement the table behaviour as elegantly as possible.
+const results = [];
 
 // Users can provide a Preview API Key. API requests will need to be altered conditionally
 // based on this: the API key will need to be included as a Bearer token (if included),
@@ -111,9 +115,10 @@ async function controlScript() {
     // for testing
     if (anyURLs[0].length == 0) {
       displayNotification("No external URLs found", "is-warning");
-      throw new Error("Process Aborted")
+      throw new Error("Process Aborted");
     } else {
       displayNotification(`${anyURLs[1]} URLs found for testing`, "is-success");
+      setTableHeaders();
       await testLinks(anyURLs[0]);
     }
   } catch (error) {
@@ -149,9 +154,9 @@ async function checkTypes() {
 // URLs are found, there are no URLs to send to the server for testing.
 async function findExternalLinks(types, language) {
   try {
-  const richTextItems = await getItems(types, language);
-  const foundURLs = await findURLsInRichText(richTextItems);
-  return foundURLs;
+    const richTextItems = await getItems(types, language);
+    const foundURLs = await findURLsInRichText(richTextItems);
+    return foundURLs;
   } catch (error) {
     // log error to console for debugging purposes
     console.error(error);
@@ -311,7 +316,7 @@ function findURLsInRichText(inputArray) {
       const contentItemURLs = {
         Name: item.system.name,
         URLs: urls,
-        systemID: item.system.id,
+        SystemID: item.system.id,
       };
       // Finally, add these items to the response.
       result.push(contentItemURLs);
@@ -370,11 +375,12 @@ async function testLinks(objects) {
         const lines = response.split("\n");
         for (let i = 0; i < lines.length - 1; i++) {
           const item = JSON.parse(lines[i]);
-          settingTheTable([item]);
+          processResults(item, true);
         }
         response = lines[lines.length - 1];
       }
     }
+    completeTable();
   } catch (error) {
     // log the error to the console for debugging purposes
     console.error(error);
@@ -387,10 +393,110 @@ async function testLinks(objects) {
   toggleProgress("off");
 }
 
-// This renders the response from the server in a table format
-function settingTheTable(input) {
-  const table = document.getElementById("results");
+// SECTION - Table Behaviour
+// See README.md for description of table behaviour.
+// This section houses most of the functions and global variables needed for this.
 
+// 20 seems like a good amount, this could be changed to be configurable by user.
+const itemsPerPage = 10;
+
+// This records how many table pages currently exist, and will be increment as results
+// are returned from the server.
+let pagesExist = 0;
+
+// This is a re-writable variable that governs when a new page should be presented for
+// the results table. This will be increased as results are returned from the server.
+let nextPageThreshold = itemsPerPage;
+
+// This ended up being used in more than one function, so here it is. Global.
+const tableBody = document.getElementById("results");
+
+// Processes results returned from the server, allowing both rendering and pagination
+// to be performed incrementally.
+function processResults(result) {
+  const transformedResult = transformResultsObject(result);
+  console.log(transformedResult);
+  transformedResult.forEach((urlObject) => {
+    results.push(urlObject);
+    if (results.length < itemsPerPage + 1) {
+      settingTheTable(urlObject);
+    }
+    if (results.length == nextPageThreshold) {
+      pagesExist++;
+      newPage(pagesExist);
+      nextPageThreshold += itemsPerPage;
+    }
+  });
+}
+
+// This function will use the object returned in the server response to store
+// information on each URL seperately, to allow consistent page sizes when
+// rendering results in table format.
+function transformResultsObject(linksObject) {
+  return linksObject.URLs.map((url) => {
+    return {
+      URL: url.URL,
+      Response: url.Response,
+      ResponseTime: url.ResponseTime,
+      Redirected: url.Redirected,
+      Error: url.Error,
+      Item: {
+        Name: linksObject.Name,
+        SystemID: linksObject.SystemID,
+      },
+    };
+  });
+}
+
+// Since "new pages" are added to the table when the length of the 'results' array
+// reaches a certain threshold, it will often be necessary to render a final page,
+// e.g., when there are more results than will fit on the penultimate page, but
+// too few to trigger another being presented.
+// While this should only ever need 1 extra page, I see no harm in being cautious
+// and wrapping this in a 'while' loop, ensuring there will always be sufficient
+// pages made available by checking against an equation that calculates how many
+// pages should be required.
+function completeTable() {
+  const numberOfPages = Math.ceil(results.length / itemsPerPage);
+  while (pagesExist < numberOfPages) {
+    pagesExist++;
+    newPage(pagesExist);
+  }
+}
+
+// Adds new page numbers to table navigation
+function newPage(num) {
+  const paginationStation = document.getElementById("pageList");
+  const newPageNum = `<li class="pagination-link" onclick="showPage(${num})">${num}</li>`;
+  paginationStation.insertAdjacentHTML("beforeend", newPageNum);
+}
+
+function showPage(pageNum) {
+  tableBody.innerHTML = "";
+  const start = (pageNum - 1) * itemsPerPage;
+  const end = pageNum * itemsPerPage;
+  for (let i = start; i < end; i++) {
+    results[i] ? settingTheTable(results[i]) : null;
+  }
+}
+
+// This renders the responses from the server in a table format
+function settingTheTable(result) {
+  console.log;
+  const row = `<tr class=${urlColour(result)}>
+                <td><a target="_blank" rel="noreferrer" href='${linkToContentItem}${
+    result.Item.SystemID
+  }'>${result.Item.Name}</a></td>
+              <td>${result.URL}</td>
+              <td>${result.Response}</td>
+              <td>${result.ResponseTime}</td>
+            </tr>`;
+  tableBody.insertAdjacentHTML("beforeend", row);
+}
+
+// Does what it says on the label - sets table headers.
+function setTableHeaders() {
+  const tableHeaders = document.getElementById("header");
   const headings = [
     "Content Item Name",
     "URL Found",
@@ -398,27 +504,12 @@ function settingTheTable(input) {
     "Response Time",
   ];
 
-  if (!table.hasChildNodes()) {
+  if (!tableHeaders.hasChildNodes()) {
     const headingsRow = `<tr>${headings
       .map((heading) => `<th>${heading}</th>`)
       .join("")}</tr>`;
-    table.insertAdjacentHTML("beforeend", headingsRow);
+    tableHeaders.insertAdjacentHTML("beforeend", headingsRow);
   }
-
-  const rows = input.flatMap((item) =>
-    item.URLs.map((url) => {
-      return `<tr class=${urlColour(url)}>
-              <td><a target="_blank" rel="noreferrer" href='${linkToContentItem}${
-        item.systemID
-      }'>${item.Name}</a></td>
-              <td>${url.URL}</td>
-              <td>${url.Response}</td>
-              <td>${url.ResponseTime}</td>
-            </tr>`;
-    })
-  );
-
-  table.insertAdjacentHTML("beforeend", rows.join(""));
 }
 
 // SECTION: Helper functions
@@ -470,6 +561,7 @@ async function callAPI(endpoint, requestMethod) {
 
 // Sets table colouration by adding Bulma class, according to response data
 function urlColour(url) {
+  console.log(url);
   if (url.Redirected) {
     return "has-text-warning";
   } else if (url.Error) {
