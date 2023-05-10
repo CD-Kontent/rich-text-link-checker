@@ -23,6 +23,9 @@ Text colour differentiates between URLs that are accessed successfully, that ret
 
 ### Features
 
+#### Open Content Items in Kontent.ai
+The "Content Item Name" field in the results table is also a link, configured to open the Kontent.ai app to the specific Content Item in which the link was found. This makes it easier to correct or remove "broken" links!
+
 #### Incremental Table Pagination
 The prototype of this tool presented results to the user in a table that was rendered incrementally, as results are returned from the server. This was to reduce the wait time for initial results caused by longer response times, timeouts, or retries for certain URLs. Waiting for every URL to tested, and the responses returned, would quickly lead to a lengthy wait for the user to see any results from their scan.
 
