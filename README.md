@@ -72,7 +72,7 @@ In the particular case of a `404` error (Not Found), this is likely due to an in
 
 ## Planned Features
 
-- ~~** Result Pagination:**~~
+- ~~Result Pagination:~~
 
 *Implemented v1.1*
 
@@ -96,5 +96,5 @@ As an amusing side-note, one project set up to test the tool with a large number
 ## Notes
 
 ### Environment vs Project
-While coding this, Kontent.ai moved towards greater distiction between Projects and Environments, and what was once called a Project ID was changed to (the more accurate) Environment ID.
+During the development of this project, Kontent.ai moved towards greater distiction between Projects and Environments, and what was once called a Project ID was changed to (the more accurate) Environment ID.
 I've changed the user-facing references to Environment ID, but there are still references to "project" in the code that should be understood as "environment."
