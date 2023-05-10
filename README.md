@@ -89,7 +89,7 @@ The number of items displayed per page in tabulated results is currently hard-co
 
 - **Abort Scan**
 
-Currently there is no way for to stop a scan once begun. Refreshing or closing the browser tab will, of course, end the user interaction with the scan; but currently the server will continue processing the request.
+Currently there is no way to stop a scan once begun. Refreshing or closing the browser tab will, of course, end the user interaction with the scan; but currently the server will continue processing the request.
 This is something of a "worst of both worlds" situation, as there is no way for the user to re-establish the connection and accessing the results of the server process. Ending the server processes when a client action should reasonably be expected to terminate the entire process a high-priority inclusion for future updates. This would also make possible the inclusion of an "End Scan" button for the user.
 
 - **Pagination Ellipses**
