@@ -3,11 +3,13 @@ v1.1
 
 ## Description
 
-This is a tool to check external URLs in a Kontent.ai project.
+This is a tool to check external/outbound URLs in a Kontent.ai project.
 It will scan a particular environment for Content Types containing rich text elements, and then retrieve all Content Items of the identified types.
 These will be scanned for any external URLs, which will then be tested to display a status code and response time to the user.
 
 Text colour differentiates between URLs that are accessed successfully, that return errors, and that redirect. 
+
+Note that the tool will make several API calls in this process, which will count against your usage.
 
 ### Limitations
 
@@ -51,7 +53,7 @@ The plan is to improve this over time, but no promises are being offered.
 
 Supply an Environment ID (required), Preview API Key (optional), and Language Codename (optional), in the provided form.
 
-The tool will scan for URLs, and send them to a server to be tested, and display the responses on-screen in table form. 
+The tool will scan for URLs, send them to a server to be tested, and display the responses on-screen in table form. 
 
 ### Colour Codes
 
