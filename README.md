@@ -54,7 +54,7 @@ The tool will scan for URLs, and send them to a server to be tested, and display
 
 - A *green* row indicates that the URL behaved as expected: the request was successful, with no redirects.
 - A *yellow* row indicates that the request to this URL was redirected.
-- A *red* row indicates the request to this URL returned an error (potential indication for a 'dead link').
+- A *red* row indicates the request to this URL returned an error (potential indication of a 'dead link').
 
 ### API Errors
 
@@ -74,7 +74,8 @@ In the particular case of a `404` error (Not Found), this is likely due to an in
 
 - ~~** Result Pagination:**~~
 
-Implemented v1.1
+*Implemented v1.1*
+
 Pagination of the results table is planned for a future update. Currently, results are rendered as they are returned from the server, rather than waiting for the complete data set (or server-side pagination). This conflicts with the usual client-side "show subset of complete data set" approach to pagination.
 
 - **Configurable "Items per page"**
@@ -85,6 +86,12 @@ The number of items displayed per page in tabulated results is currently hard-co
 
 Currently there is no way for to stop a scan once begun. Refreshing or closing the browser tab will, of course, end the user interaction with the scan; but currently the server will continue processing the request.
 This is something of a "worst of both worlds" situation, as there is no way for the user to re-establish the connection and accessing the results of the server process. Ending the server processes when a client action should reasonably be expected to terminate the entire process a high-priority inclusion for future updates. This would also make possible the inclusion of an "End Scan" button for the user.
+
+- **Pagination Ellipses**
+
+Current pagination behaviour produces a navigation icon per page. This works admirably for moderate datasets, but is unmanageable for larger sets, as the number of icons grows to the dozens, or hundreds. A commonly used approach is to include ellipses to indicate a range of hidden page numbers, which should work suitably for this project.
+
+As an amusing side-note, one project set up to test the tool with a large number of external URLs (currently over 3000) will result in the page navigation taking up more display area than the results table!
 
 ## Notes
 

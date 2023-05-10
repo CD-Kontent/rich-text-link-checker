@@ -15,7 +15,7 @@ submit.addEventListener("click", (event) => {
 
 // I dislike using a global variable to store the response data, but them's the breaks.
 // This is necessary to implement the table behaviour as elegantly as possible.
-const results = [];
+let results = [];
 
 // Users can provide a Preview API Key. API requests will need to be altered conditionally
 // based on this: the API key will need to be included as a Bearer token (if included),
@@ -38,6 +38,10 @@ let linkToContentItem = "";
 
 // Handles user form inputs and updates global variables accordingly
 async function processUserInputs() {
+  // Clear results from previous operations - this was previously an automatic process as
+  // results weren't stored in a global variable. This was changed to accomodate new table
+  // behaviour, but results persisting create unwanted behaviours.
+  results = []
   let input = document.getElementById("details");
   const project = input.elements[0].value;
   // Language is an optional input, but passed as a parameter in a later function, so needs
@@ -415,7 +419,6 @@ const tableBody = document.getElementById("results");
 // to be performed incrementally.
 function processResults(result) {
   const transformedResult = transformResultsObject(result);
-  console.log(transformedResult);
   transformedResult.forEach((urlObject) => {
     results.push(urlObject);
     if (results.length < itemsPerPage + 1) {
@@ -482,7 +485,6 @@ function showPage(pageNum) {
 
 // This renders the responses from the server in a table format
 function settingTheTable(result) {
-  console.log;
   const row = `<tr class=${urlColour(result)}>
                 <td><a target="_blank" rel="noreferrer" href='${linkToContentItem}${
     result.Item.SystemID
@@ -561,7 +563,6 @@ async function callAPI(endpoint, requestMethod) {
 
 // Sets table colouration by adding Bulma class, according to response data
 function urlColour(url) {
-  console.log(url);
   if (url.Redirected) {
     return "has-text-warning";
   } else if (url.Error) {
